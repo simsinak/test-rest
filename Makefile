@@ -1,4 +1,4 @@
-REGISTRY?=directxman12
+REGISTRY?=simsinak
 IMAGE?=test-rest
 ARCH?=$(shell go env GOARCH)
 ALL_ARCH=amd64 arm arm64 ppc64le s390x
@@ -32,11 +32,11 @@ all: $(OUT_DIR)/$(ARCH)/adapter
 
 src_deps=$(shell find pkg cmd -type f -name "*.go")
 $(OUT_DIR)/%/adapter: $(src_deps)
-	CGO_ENABLED=0 GOARCH=$* go build -tags netgo -o $(OUT_DIR)/$*/adapter github.com/directxman12/k8s-prometheus-adapter/cmd/adapter
+	CGO_ENABLED=0 GOARCH=$* go build -tags netgo -o $(OUT_DIR)/$*/adapter github.com/simsinak/test-rest/cmd/adapter
 
 docker-build: $(OUT_DIR)/Dockerfile
-	docker run -it -v $(OUT_DIR):/build -v $(PWD):/go/src/github.com/directxman12/k8s-prometheus-adapter -e GOARCH=$(ARCH) $(GOIMAGE) /bin/bash -c "\
-		CGO_ENABLED=0 go build -tags netgo -o /build/$(ARCH)/adapter github.com/directxman12/k8s-prometheus-adapter/cmd/adapter"
+	docker run -it -v $(OUT_DIR):/build -v $(PWD):/go/src/github.com/test-rest -e GOARCH=$(ARCH) $(GOIMAGE) /bin/bash -c "\
+		CGO_ENABLED=0 go build -tags netgo -o /build/$(ARCH)/adapter github.com/simsinak/test-rest/cmd/adapter"
 
 	docker build -t $(REGISTRY)/$(IMAGE)-$(ARCH):$(VERSION) --build-arg ARCH=$(ARCH) --build-arg BASEIMAGE=$(BASEIMAGE) $(OUT_DIR)
 
