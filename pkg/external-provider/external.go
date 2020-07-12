@@ -87,7 +87,7 @@ func (c *metricConverter) Convert(info provider.ExternalMetricInfo, queryResult 
 
 func NewBasicMetricLister(lookback time.Duration) MetricLister {
 	lister := basicMetricLister{
-		lookback:   lookback,
+		lookback: lookback,
 	}
 	return &lister
 }
@@ -101,7 +101,7 @@ type MetricUpdateResult struct {
 }
 
 type basicMetricLister struct {
-	lookback   time.Duration
+	lookback time.Duration
 }
 
 func (l *basicMetricLister) ListAllMetrics() (MetricUpdateResult, error) {
@@ -109,7 +109,7 @@ func (l *basicMetricLister) ListAllMetrics() (MetricUpdateResult, error) {
 		value: 0,
 	}
 	startTime := time.Now().Add(-1 * l.lookback)
-	result.value = startTime.Second()
+	result.value = startTime.Minute()
 	return result, nil
 }
 
@@ -194,13 +194,14 @@ func (l *periodicMetricLister) RunUntil(stopChan <-chan struct{}) {
 		}
 	}, l.updateInterval, stopChan)
 }
+
 // PeriodicLister: end
 
 // registry: start
 func NewExternalRegistry(lister MetricListerWithNotification) ExternalRegistry {
 	var registry = externalRegistry{
-		metrics:     make(map[provider.ExternalMetricInfo]bool, 0),
-		metricsValues:     make(map[provider.ExternalMetricInfo]int, 0),
+		metrics:       make(map[provider.ExternalMetricInfo]bool, 0),
+		metricsValues: make(map[provider.ExternalMetricInfo]int, 0),
 	}
 	lister.AddNotificationReceiver(registry.filterAndStoreMetrics)
 	return &registry
@@ -214,8 +215,8 @@ type ExternalRegistry interface {
 }
 
 type externalRegistry struct {
-	mu sync.RWMutex
-	metrics map[provider.ExternalMetricInfo]bool
+	mu            sync.RWMutex
+	metrics       map[provider.ExternalMetricInfo]bool
 	metricsValues map[provider.ExternalMetricInfo]int
 }
 
@@ -246,11 +247,11 @@ func (r *externalRegistry) filterAndStoreMetrics(result MetricUpdateResult) {
 	apiMetricsCache := make(map[provider.ExternalMetricInfo]bool, 0)
 	apiMetricsValueCache := make(map[provider.ExternalMetricInfo]int, 0)
 	apiMetricsCache[provider.ExternalMetricInfo{
-			Metric: "queue-size",
-	}]=true
+		Metric: "queue-size",
+	}] = true
 	apiMetricsValueCache[provider.ExternalMetricInfo{
 		Metric: "queue-size",
-	}]=result.value
+	}] = result.value
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
